@@ -1,0 +1,5 @@
+Get all user data
+    Meteor.users.find().fetch()
+
+All users who have completed this course
+    Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
