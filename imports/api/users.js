@@ -4,7 +4,9 @@ Accounts.onCreateUser((options, user) => {
         createdAt: new Date(),
         profile: {
             name: options.name,
-            completedCourses: []
+            completedCourses: [],
+            rate: 0,
+            availabilities: [],
         }
     });
     
@@ -12,6 +14,7 @@ Accounts.onCreateUser((options, user) => {
 });
 
 Meteor.methods({
+    // SETTERS
     'users.setName': ({name}) => {
         var profile = Meteor.user().profile
         profile.name = name
@@ -21,8 +24,36 @@ Meteor.methods({
         )
     },
 
-    'users.getAllWhoCompletedCourse': ({courseId}) => {
+    'users.setRate': ({rate}) => {
+        Meteor.users.update(
+            Meteor.userId(), 
+            { $set: {"profile.rate": rate} }
+        )
+    },
 
+    'users.addAvailability': ({date, repeats}) => {
+        var newAvailability = {"date": date, "repeats": repeats}
+        Meteor.users.update(
+            {_id: Meteor.userId()}, 
+            { $addToSet: {"profile.availabilities": newAvailability} }
+        )
+    },
+
+    // GETTERS
+    'users.getAvailabilities': ({userId}) => {
+        console.log("userId: ", userId)
+        const user = Meteor.users.findOne(userId)
+        
+        if (user != 'undefined') {
+            const profile = user.profile
+            return user.profile.availabilities
+        } else {
+            return []
+        }
+        
+    },
+
+    'users.getAllWhoCompletedCourse': ({courseId}) => {
         const users = Meteor.users.find(
             { "profile.completedCourses": { $in: [ courseId ] }},
             {fields: { "profile": 1,} 
