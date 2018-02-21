@@ -4,6 +4,7 @@ Accounts.onCreateUser((options, user) => {
         createdAt: new Date(),
         profile: {
             name: options.name,
+            imageId: null,
             completedCourses: [],
             rate: 0,
             availabilities: [],
@@ -24,6 +25,24 @@ Meteor.methods({
         )
     },
 
+    'users.setProfileImage': ({image}) => {
+        FS.Utility.eachFile(event, function(image) {
+            Images.insert(file, function (err, fileObj) {
+                if (err) {
+                    return false;
+                } else {
+                    // update profile to include profile image id
+                    Meteor.users.update(
+                        Meteor.userId(), 
+                        { $set: {"profile.imageId": fileObj_id} }
+                    )
+                    return true;
+                }
+                // Inserted new doc with ID fileObj._id, and kicked off the data upload using HTTP
+            });
+        });
+    },
+
     'users.setRate': ({rate}) => {
         Meteor.users.update(
             Meteor.userId(), 
@@ -31,8 +50,9 @@ Meteor.methods({
         )
     },
 
-    'users.addAvailability': ({date, repeats}) => {
-        var newAvailability = {"date": date, "repeats": repeats}
+    'users.addAvailability': ({date, length, repeats}) => {
+        var newAvailability = {"date": date, "length": length, "repeats": repeats}
+        console.log(newAvailability)
         Meteor.users.update(
             {_id: Meteor.userId()}, 
             { $addToSet: {"profile.availabilities": newAvailability} }

@@ -22,3 +22,5 @@ accounts-password
 accounts-ui
 erasaur:meteor-lodash
 msavin:mongol
+cfs:standard-packages
+cfs:filesystem
