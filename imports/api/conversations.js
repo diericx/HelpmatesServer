@@ -16,8 +16,4 @@ Meteor.methods({
     },
 });
 
-Meteor.publish('thisConversation', function ({id}) {
-    return Conversations.find({ _id: id });
-});
-
 export default Conversations;
