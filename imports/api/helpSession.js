@@ -62,6 +62,7 @@ Meteor.methods({
 });
 
 Meteor.publish('mySessions', function () {
+    console.log("Publish my sessions");
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
         fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1}
     })

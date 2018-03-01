@@ -5,7 +5,6 @@ const Conversations = new Mongo.Collection('conversations');
 
 Meteor.methods({
     'conversations.sendMessage': ({ conversationId, message }) => {
-        console.log("convoId: ", conversationId, "message: ", message)
         // const convo = Conversations.findOne(conversationId);
         Conversations.update(
             {_id: conversationId},

@@ -1,6 +1,7 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 import Universities from './universities';
+import Conversations from './conversations';
 
 const Courses = new Mongo.Collection('courses');
 
@@ -13,7 +14,10 @@ Meteor.methods({
             'University by that ID not found');
         }
 
-        return Courses.insert({ universityId, title1, title2, subject });
+        // create new conversation
+        conversationId = Conversations.insert({messages: []})
+
+        return Courses.insert({ universityId, title1, title2, subject, conversationId });
     },
     
     'courses.getAllForUni': ({universityId}) => {
@@ -27,6 +31,16 @@ Meteor.methods({
         return Courses.find({universityId: universityId}).fetch();
     },
 })
+
+Meteor.publish('courses', function () {
+    return Courses.find({})
+});
+
+Meteor.publish('courseChat', function({id}) {
+    // get course data
+    var course = Courses.findOne({_id: id})
+    return Conversations.find({_id: course.conversationId})
+});
 
 export default Courses;
 
