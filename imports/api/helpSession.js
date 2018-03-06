@@ -9,10 +9,13 @@ const HelpSessions = new Mongo.Collection('helpSessions');
 Meteor.methods({
     // SETTERS
     'helpSessions.create': ({ studentId, tutorId, courseId, startDate, endDate }) => {
+        // get cost of this session
+        tutor = Meteor.users.find(tutorId).fetch()
+        cost = tutor.completedCourses[courseId]
         // create new conversation
         conversationId = Conversations.insert({messages: []})
         // create new help session with link to convo
-        return HelpSessions.insert({ studentId, tutorId, courseId, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversationId: conversationId  });
+        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversationId: conversationId  });
     },
     'helpSessions.accept': ({ sessionId }) => {
         // find session
@@ -62,7 +65,6 @@ Meteor.methods({
 });
 
 Meteor.publish('mySessions', function () {
-    console.log("Publish my sessions");
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
         fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1}
     })

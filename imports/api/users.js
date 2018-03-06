@@ -99,7 +99,6 @@ Meteor.methods({
 
     // GETTERS
     'users.getAvailabilities': ({userId}) => {
-        console.log("userId: ", userId)
         const user = Meteor.users.findOne(userId)
         
         if (user != 'undefined') {
