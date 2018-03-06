@@ -10,8 +10,8 @@ Meteor.methods({
     // SETTERS
     'helpSessions.create': ({ studentId, tutorId, courseId, startDate, endDate }) => {
         // get cost of this session
-        tutor = Meteor.users.find(tutorId).fetch()
-        cost = tutor.completedCourses[courseId]
+        tutor = Meteor.users.findOne({_id: tutorId})
+        cost = tutor.profile.completedCourses[courseId]
         // create new conversation
         conversationId = Conversations.insert({messages: []})
         // create new help session with link to convo
