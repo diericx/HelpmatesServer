@@ -12,6 +12,9 @@ Meteor.methods({
         // get cost of this session
         tutor = Meteor.users.findOne({_id: tutorId})
         cost = tutor.profile.completedCourses[courseId]
+        if (!cost) {
+            return false
+        }
         // create new conversation
         conversationId = Conversations.insert({messages: []})
         // create new help session with link to convo
@@ -24,6 +27,24 @@ Meteor.methods({
             HelpSessions.update(
                 {_id: sessionId},
                 {$set: {tutorAccepted: true}}
+            )
+            return true
+        }
+        return {error: "You do not have access to this session"}
+    },
+    'helpSessions.end': ({ sessionId }) => {
+        // find session
+        const session = HelpSessions.findOne(sessionId)
+        if (session.tutorId == Meteor.userId()) {
+            HelpSessions.update(
+                {_id: sessionId},
+                {$set: {tutorEnded: true}}
+            )
+            return true
+        } else {
+            HelpSessions.update(
+                {_id: sessionId},
+                {$set: {studentEnded: true}}
             )
             return true
         }
@@ -66,7 +87,7 @@ Meteor.methods({
 
 Meteor.publish('mySessions', function () {
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
-        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1}
+        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1, endedAt: 1}
     })
     var sessions = sessionsCursor.fetch()
 

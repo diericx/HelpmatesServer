@@ -101,7 +101,7 @@ Meteor.methods({
     'users.getAvailabilities': ({userId}) => {
         const user = Meteor.users.findOne(userId)
         
-        if (user != 'undefined') {
+        if (user) {
             const profile = user.profile
             return user.profile.availabilities
         } else {
