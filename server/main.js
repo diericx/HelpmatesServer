@@ -5,6 +5,7 @@ import '../imports/api/users';
 import '../imports/api/helpSession';
 import '../imports/api/conversations';
 import '../imports/api/images';
+import '../imports/api/ratings';
 
 Meteor.startup(() => {
   // code to run on server at startup

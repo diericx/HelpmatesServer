@@ -25,7 +25,7 @@ Meteor.methods({
         const message = {
             text: initialMessageTextPrefix + initialMessageText,
             user: {
-                id: studentId,
+                _id: studentId,
                 name: student.profile.name,
             },
             createdAt: new Date(),
@@ -39,11 +39,24 @@ Meteor.methods({
     'helpSessions.accept': ({ sessionId }) => {
         // find session
         const session = HelpSessions.findOne(sessionId)
+        const tutor = Meteor.users.findOne({_id: session.tutorId})
+        // make sure this user has authority to accept a session
         if (session.tutorId == Meteor.userId()) {
             HelpSessions.update(
                 {_id: sessionId},
                 {$set: {tutorAccepted: true}}
             )
+
+            // send system message update
+            const message = {
+                _id: Random.id(),
+                text: tutor.profile.name + " accepted! Figure out where to meet.",
+                createdAt: new Date(),
+                system: true,
+            }
+            // send system message
+            Meteor.call("conversations.sendMessage", {conversationId: session.conversationId, message})
+
             return true
         }
         return {error: "You do not have access to this session"}
@@ -56,15 +69,21 @@ Meteor.methods({
                 {_id: sessionId},
                 {$set: {tutorEnded: true}}
             )
-            return true
-        } else {
+            session.tutorEnded = true
+        } else if (session.studentId == Meteor.userId()){
             HelpSessions.update(
                 {_id: sessionId},
                 {$set: {studentEnded: true}}
             )
-            return true
         }
-        return {error: "You do not have access to this session"}
+        // if they both ended, add an ended date
+        if (session.studentEnded && session.tutorEnded) {
+            HelpSessions.update(
+                {_id: sessionId},
+                {$set: {endedAt: new Date()}}
+            )
+            session.studentEnded = true
+        }
     },
     'helpSessions.start': ({ sessionId }) => {
         const session = HelpSessions.findOne(sessionId)
@@ -103,7 +122,7 @@ Meteor.methods({
 
 Meteor.publish('mySessions', function () {
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
-        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1, endedAt: 1}
+        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1, endedAt: 1, startedAt: 1}
     })
     var sessions = sessionsCursor.fetch()
 
