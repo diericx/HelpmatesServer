@@ -1,5 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
+import { Random } from 'meteor/random'
 
 import Conversations from './conversations';
 import Courses from "./courses";
@@ -8,15 +9,30 @@ const HelpSessions = new Mongo.Collection('helpSessions');
 
 Meteor.methods({
     // SETTERS
-    'helpSessions.create': ({ studentId, tutorId, courseId, startDate, endDate }) => {
+    'helpSessions.create': ({ studentId, tutorId, courseId, startDate, endDate, initialMessageText }) => {
         // get cost of this session
         tutor = Meteor.users.findOne({_id: tutorId})
+        student = Meteor.users.findOne({_id: studentId});
         cost = tutor.profile.completedCourses[courseId]
-        if (!cost) {
+        // make sure cost, tutor and student exist
+        if (!cost || !tutor || !student) {
             return false
         }
-        // create new conversation
+        // create new conversation for this session
         conversationId = Conversations.insert({messages: []})
+        // create initial message
+        const initialMessageTextPrefix = "Hi! I need help with "
+        const message = {
+            text: initialMessageTextPrefix + initialMessageText,
+            user: {
+                id: studentId,
+                name: student.profile.name,
+            },
+            createdAt: new Date(),
+            _id: Random.id(),
+        }
+        // send initial message
+        Meteor.call("conversations.sendMessage", {conversationId, message})
         // create new help session with link to convo
         return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversationId: conversationId  });
     },

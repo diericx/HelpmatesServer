@@ -10,7 +10,6 @@ Meteor.methods({
             {_id: conversationId},
             {$push: { messages: message }}
         )
-
         // return Courses.insert({ universityId, title1, title2, subject });
     },
 });
