@@ -1,4 +1,5 @@
 import Courses from "./courses";
+import Ratings from "./ratings";
 
 Accounts.onCreateUser((options, user) => {
     // add your extra fields here; don't forget to validate the options, if needed
@@ -121,7 +122,7 @@ Meteor.methods({
 })
 
 Meteor.publish('tutors', function () {
-    var tutors = Meteor.users.find(
+    var tutorsCursor = Meteor.users.find(
         {"profile.completedCourses": {$ne: []}},
         {
             fields: {
@@ -129,5 +130,14 @@ Meteor.publish('tutors', function () {
             }
         }
     )
-    return tutors
+    // Get reviews for all these users
+    var idsForUsers = tutorsCursor.fetch().map(function(user) { 
+        return user._id;
+    });  // Gets an array of all Room IDs for the user.
+    var ratingsCursor = Ratings.find({ targetUserId: { $in: idsForUsers } });
+
+    return [
+        tutorsCursor,
+        ratingsCursor
+    ]
 });

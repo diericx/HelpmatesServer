@@ -9,4 +9,12 @@ Meteor.methods({
     },
 })
 
+Meteor.publish('ratingsForSession', function ({id}) {
+    var ratingsCursor = Ratings.find({sessionId: id}, {
+        fields: {_id: 1, rating: 1, message: 1, userId: 1, targetId: 1}
+    })
+
+    return ratingsCursor;
+});
+
 export default Ratings;
