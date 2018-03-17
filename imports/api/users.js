@@ -122,13 +122,19 @@ Meteor.publish('tutors', function () {
         }
     )
     // Get reviews for all these users
-    var idsForUsers = tutorsCursor.fetch().map(function(user) { 
+    var idsForTutors = tutorsCursor.fetch().map(function(user) { 
         return user._id;
-    });  // Gets an array of all Room IDs for the user.
-    var ratingsCursor = Ratings.find({ targetUserId: { $in: idsForUsers } });
-
+    }); 
+    var ratingsCursor = Ratings.find({ targetUserId: { $in: idsForTutors } });
+    // Get ids for users who rated this tutor
+    var idsForRaters = ratingsCursor.fetch().map(function(rating) { 
+        return rating.userId;
+    }); 
+    // combine user Ids
+    let userIds = idsForTutors.concat(idsForRaters);
+    var usersCursor = Meteor.users.find({_id: { $in: userIds } });
     return [
-        tutorsCursor,
+        usersCursor,
         ratingsCursor
     ]
 });
