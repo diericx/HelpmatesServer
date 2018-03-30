@@ -1,5 +1,6 @@
 import Courses from "./courses";
 import Ratings from "./ratings";
+import Conversations from "./conversations";
 
 Accounts.onCreateUser((options, user) => {
     // create support conversation for this user
