@@ -2,11 +2,15 @@ import Courses from "./courses";
 import Ratings from "./ratings";
 
 Accounts.onCreateUser((options, user) => {
+    // create support conversation for this user
+    conversationId = Conversations.insert({messages: []})
+
     // add your extra fields here; don't forget to validate the options, if needed
     _.extend(user, {
         createdAt: new Date(),
         profile: {
             name: options.name,
+            supportConversationId: conversationId,
             profilePic: null,
             completedCourses: {},
             rate: 0,
