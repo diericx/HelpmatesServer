@@ -1,6 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
-import { Random } from 'meteor/random'
+import { Random } from 'meteor/random';
 
 import Conversations from './conversations';
 import Courses from "./courses";

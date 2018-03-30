@@ -1,3 +1,5 @@
+import { Random } from 'meteor/random'
+
 import Courses from "./courses";
 import Ratings from "./ratings";
 import Conversations from "./conversations";
