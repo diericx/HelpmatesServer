@@ -122,7 +122,7 @@ Meteor.methods({
 
 Meteor.publish('mySessions', function () {
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
-        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1, endedAt: 1, startedAt: 1}
+        fields: {_id: 1, courseId: 1, studentId: 1, tutorId: 1, tutorAccepted: 1, tutorDenied: 1, cancelled: 1, startDate: 1, endDate: 1, endedAt: 1, startedAt: 1}
     })
     var sessions = sessionsCursor.fetch()
 

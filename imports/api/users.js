@@ -82,7 +82,6 @@ Meteor.methods({
 
     'users.addAvailability': ({date, length, repeats}) => {
         var newAvailability = {"date": date, "length": length, "repeats": repeats}
-        console.log(newAvailability)
         Meteor.users.update(
             {_id: Meteor.userId()}, 
             { $addToSet: {"profile.availabilities": newAvailability} }
@@ -113,19 +112,26 @@ Meteor.methods({
 })
 
 Meteor.publish('tutors', function () {
-    var tutorsCursor = Meteor.users.find(
+    var tutors = Meteor.users.find(
         {"profile.completedCourses": {$ne: []}},
         {
             fields: {
                 profile: 1, _id: 1,
             }
         }
-    )
+    ).fetch()
     // Get reviews for all these users
-    var idsForTutors = tutorsCursor.fetch().map(function(user) { 
+    var idsForTutors = tutors.map(function(user) { 
         return user._id;
     }); 
     var ratingsCursor = Ratings.find({ targetUserId: { $in: idsForTutors } });
+    // Get completed courses for all these users
+    var idsForCourses = tutors.map(function(user) { 
+        return user.completedCourses;
+    })
+    idsForCourses = [].concat.apply([], idsForCourses);
+    var coursesCursor = Courses.find({ _id: { $in: idsForCourses } });
+
     // Get ids for users who rated this tutor
     var idsForRaters = ratingsCursor.fetch().map(function(rating) { 
         return rating.userId;
@@ -135,6 +141,7 @@ Meteor.publish('tutors', function () {
     var usersCursor = Meteor.users.find({_id: { $in: userIds } });
     return [
         usersCursor,
-        ratingsCursor
+        ratingsCursor,
+        coursesCursor
     ]
 });

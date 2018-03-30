@@ -36,12 +36,6 @@ Meteor.publish('courses', function () {
     return Courses.find({})
 });
 
-Meteor.publish('courseChat', function({id}) {
-    // get course data
-    var course = Courses.findOne({_id: id})
-    return Conversations.find({_id: course.conversationId})
-});
-
 export default Courses;
 
 // Meteor.call('courses.addOne', 'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science')

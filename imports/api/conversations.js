@@ -14,4 +14,9 @@ Meteor.methods({
     },
 });
 
+Meteor.publish('getConversation', function({id}) {
+    // get course data
+    return Conversations.find({_id: id})
+});
+
 export default Conversations;

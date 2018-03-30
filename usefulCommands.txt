@@ -3,3 +3,13 @@ Get all user data
 
 All users who have completed this course
     Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+
+Add university
+    Meteor.call('universities.addOne', {name: 'University of Denver', abbreviation: 'DU', state: 'CO', city: 'Denver'})
+
+Add course
+    Meteor.call('courses.addOne', {universityId: 'bJ2ppiHYrMFRThfWE', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science'})
+
+
+
+'courses.addOne': ({ universityId, title1, title2, subject })
