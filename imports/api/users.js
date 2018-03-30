@@ -6,6 +6,16 @@ Accounts.onCreateUser((options, user) => {
     // create support conversation for this user
     conversationId = Conversations.insert({messages: []})
 
+    // send system message update
+    const message = {
+        _id: Random.id(),
+        text: "Give us feedback!",
+        createdAt: new Date(),
+        system: true,
+    }
+    // send system message
+    Meteor.call("conversations.sendMessage", {conversationId, message})
+
     // add your extra fields here; don't forget to validate the options, if needed
     _.extend(user, {
         createdAt: new Date(),
