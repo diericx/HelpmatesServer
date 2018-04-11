@@ -36,6 +36,16 @@ Meteor.publish('courses', function () {
     return Courses.find({})
 });
 
+Meteor.publish('course', function({_id}) {
+    return Courses.find({_id});
+})
+
+Meteor.publish('myCourses', function () {
+    const courses = Meteor.user().profile.completedCourses;
+    const courseIds = Object.keys(courses)
+    return Courses.find({_id: {$in: courseIds}});
+});
+
 export default Courses;
 
 // Meteor.call('courses.addOne', 'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science')
