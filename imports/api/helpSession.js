@@ -4,6 +4,7 @@ import { Random } from 'meteor/random';
 
 import Conversations from './conversations';
 import Courses from "./courses";
+import { SendPushNotification } from "./expo";
 
 const HelpSessions = new Mongo.Collection('helpSessions');
 
@@ -33,6 +34,10 @@ Meteor.methods({
         }
         // send initial message
         Meteor.call("conversations.sendMessage", {conversationId, message})
+
+        // Send push notification to the tutor
+        SendPushNotification(tutor.profile.pushNotificationToken, student.profile.name + " sent you a request!", message.text)
+
         // create new help session with link to convo
         return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversationId: conversationId  });
     },

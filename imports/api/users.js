@@ -1,5 +1,5 @@
 import { Random } from 'meteor/random'
-
+import { Meteor } from 'meteor/meteor';
 import Courses from "./courses";
 import Ratings from "./ratings";
 import Conversations from "./conversations";
@@ -24,10 +24,15 @@ Accounts.onCreateUser((options, user) => {
         profile: {
             name: options.name,
             supportConversationId: conversationId,
-            profilePic: null,
             completedCourses: {},
             rate: 0,
             availabilities: [],
+        }
+    });
+
+    Meteor.call( 'sendVerificationLink', ( error, response ) => {
+        if ( error ) {
+            console.log("Error sending verification email.")
         }
     });
     
@@ -35,9 +40,16 @@ Accounts.onCreateUser((options, user) => {
 });
 
 Meteor.methods({
+    sendVerificationLink() {
+        let userId = Meteor.userId();
+        if ( userId ) {
+            return Accounts.sendVerificationEmail( userId );
+        }
+    },
     // SETTERS
     'users.setName': ({name}) => {
         var profile = Meteor.user().profile
+        
         profile.name = name
         Meteor.users.update(
             Meteor.userId(), 
@@ -48,6 +60,16 @@ Meteor.methods({
     'user.setProfilePic': ({url}) => {
         var profile = Meteor.user().profile
         profile.profilePic = url
+        Meteor.users.update(
+            Meteor.userId(), 
+            { $set: {profile: profile} }
+        )
+    },
+
+    'user.setPushNotificationToken': ({token, userId}) => {
+        const user = Meteor.users.findOne({_id: userId})
+        var profile = user.profile
+        profile.pushNotificationToken = token
         Meteor.users.update(
             Meteor.userId(), 
             { $set: {profile: profile} }
