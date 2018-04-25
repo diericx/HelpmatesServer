@@ -13,14 +13,14 @@ Meteor.methods({
             'University by that ID not found');
         }
 
-        return Courses.insert({ universityId, title1, title2, subject, conversation: {messages: []} });
+        return Courses.insert({ universityId, title1, title2, subject, messages: []});
     },
 
     'courses.sendMessage': ({courseId, message}) => {
         // update the messages object
         Courses.update(
             {_id: courseId},
-            {$push: { "conversation.messages": message }}
+            {$push: { messages: message }}
         )
     },
     
@@ -38,7 +38,7 @@ Meteor.methods({
 
 Meteor.publish('courses', function () {
     return Courses.find({}, {
-        fields: { conversation: 0 }
+        fields: { messages: 0 }
       });
 });
 
@@ -50,7 +50,7 @@ Meteor.publish('myCourses', function () {
     const courses = Meteor.user().profile.completedCourses;
     const courseIds = Object.keys(courses)
     return Courses.find({_id: {$in: courseIds}}, {
-        fields: { conversation: 0 }
+        fields: { messages: 0 }
     });
 });
 

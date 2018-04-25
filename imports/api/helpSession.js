@@ -29,13 +29,10 @@ Meteor.methods({
             createdAt: new Date(),
             _id: Random.id(),
         }
-        // create the conversation for this help session
-        var conversation = {
-            messages: [message], 
-            notifications: {}
-        }
-        // set the notification for the tutor
-        conversation.notifications[studentId] = 1
+        // create the messages and notifications for this help session
+        var messages = [message]
+        var notifications = {}
+        notifications[studentId] = 1
 
         // Send push notification to the tutor
         if (tutor.profile.pushNotificationToken) {
@@ -43,7 +40,7 @@ Meteor.methods({
         }
 
         // create new help session with link to convo
-        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversation  });
+        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", messages, notifications  });
     },
 
     'helpSessions.sendMessage': ({sessionId, message}) => {
@@ -53,12 +50,12 @@ Meteor.methods({
         // update the messages object
         HelpSessions.update(
             {_id: sessionId},
-            {$push: { "conversation.messages": message }}
+            {$push: { "messages": message }}
         )
         
         // update the notifications
-        const currentNotificationValue = session.conversation.notifications[otherUsersId]
-        const notificationLocation = `conversation.notifications.${otherUsersId}`
+        const currentNotificationValue = session.notifications[otherUsersId]
+        const notificationLocation = `notifications.${otherUsersId}`
         HelpSessions.update(
             {_id: sessionId},
             {$set: { [notificationLocation]: currentNotificationValue + 1 }}
@@ -85,7 +82,7 @@ Meteor.methods({
                 system: true,
             }
             // send system message
-            Meteor.call("helpSessions.sendMessage", {conversationId: session.conversationId, message})
+            Meteor.call("helpSessions.sendMessage", {sessionId: session._id, message})
 
             // Send push notification to the student
             SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " accepted your request!")
@@ -155,7 +152,7 @@ Meteor.methods({
 
 Meteor.publish('mySessions', function () {
     var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
-        fields: { conversation: 0 }
+        fields: { "messages": 0 }
     })
     var sessions = sessionsCursor.fetch()
 
@@ -180,9 +177,11 @@ Meteor.publish('mySessions', function () {
 
 Meteor.publish('session', function({id}) {
     // get cursor for this session
-    var sessionCursor = HelpSessions.find({_id: id})
+    var sessionCursor = HelpSessions.find({_id: id}, {
+        fields: {"messages": 1}
+    })
     // get the data, make sure the session exists
-    var sessionData = HelpSessions.findOne(id)
+    var sessionData = sessionCursor.fetch(id)
     if (!sessionData) {
         return {error: "Session not found"}
     }

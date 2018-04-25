@@ -16,14 +16,11 @@ Accounts.onCreateUser((options, user) => {
         createdAt: new Date(),
         profile: {
             name: options.name,
-            supportConversationId: conversationId,
             completedCourses: {},
             rate: 0,
             availabilities: [],
         },
-        conversation: {
-            messages: [message],
-        }
+        messages: [message],
     });
 
     Meteor.call( 'sendVerificationLink', ( error, response ) => {
