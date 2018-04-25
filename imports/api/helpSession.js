@@ -2,7 +2,6 @@ import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 import { Random } from 'meteor/random';
 
-import Conversations from './conversations';
 import Courses from "./courses";
 import { SendPushNotification } from "./expo";
 
@@ -19,8 +18,6 @@ Meteor.methods({
         if (!cost || !tutor || !student) {
             return false
         }
-        // create new conversation for this session
-        conversationId = Conversations.insert({messages: []})
         // create initial message
         const initialMessageTextPrefix = "Hi! I need help with "
         const message = {
@@ -32,19 +29,47 @@ Meteor.methods({
             createdAt: new Date(),
             _id: Random.id(),
         }
-        // send initial message
-        Meteor.call("conversations.sendMessage", {conversationId, message})
+        // create the conversation for this help session
+        var conversation = {
+            messages: [message], 
+            notifications: {}
+        }
+        // set the notification for the tutor
+        conversation.notifications[studentId] = 1
 
         // Send push notification to the tutor
-        SendPushNotification(tutor.profile.pushNotificationToken, student.profile.name + " sent you a request!", message.text)
+        if (tutor.profile.pushNotificationToken) {
+            SendPushNotification(tutor.profile.pushNotificationToken, student.profile.name + " needs help!", message.text)
+        }
 
         // create new help session with link to convo
-        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversationId: conversationId  });
+        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", conversation  });
     },
+
+    'helpSessions.sendMessage': ({sessionId, message}) => {
+        const session = HelpSessions.findOne(sessionId)
+        const otherUsersId = message.user._id == session.tutorId ? session.studentId : session.tutorId
+
+        // update the messages object
+        HelpSessions.update(
+            {_id: sessionId},
+            {$push: { "conversation.messages": message }}
+        )
+        
+        // update the notifications
+        const currentNotificationValue = session.conversation.notifications[otherUsersId]
+        const notificationLocation = `conversation.notifications.${otherUsersId}`
+        HelpSessions.update(
+            {_id: sessionId},
+            {$set: { [notificationLocation]: currentNotificationValue + 1 }}
+        )
+    },
+    
     'helpSessions.accept': ({ sessionId }) => {
         // find session
         const session = HelpSessions.findOne(sessionId)
         const tutor = Meteor.users.findOne({_id: session.tutorId})
+        const student = Meteor.users.findOne({_id: studentId});
         // make sure this user has authority to accept a session
         if (session.tutorId == Meteor.userId()) {
             HelpSessions.update(
@@ -60,7 +85,10 @@ Meteor.methods({
                 system: true,
             }
             // send system message
-            Meteor.call("conversations.sendMessage", {conversationId: session.conversationId, message})
+            Meteor.call("helpSessions.sendMessage", {conversationId: session.conversationId, message})
+
+            // Send push notification to the student
+            SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " accepted your request!")
 
             return true
         }
@@ -126,7 +154,9 @@ Meteor.methods({
 });
 
 Meteor.publish('mySessions', function () {
-    var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]})
+    var sessionsCursor = HelpSessions.find({$or: [{studentId: Meteor.userId()}, {tutorId: Meteor.userId()}]}, {
+        fields: { conversation: 0 }
+    })
     var sessions = sessionsCursor.fetch()
 
     var studentIds =  _.pluck(sessions,"studentId");
@@ -156,12 +186,9 @@ Meteor.publish('session', function({id}) {
     if (!sessionData) {
         return {error: "Session not found"}
     }
-    // get cursors for each user and conversation
-    var conversationCursor = Conversations.find({_id: sessionData.conversationId})
 
     return [
         sessionCursor,
-        conversationCursor,
     ];
 });
 

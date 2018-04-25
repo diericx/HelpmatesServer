@@ -1,7 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
 import Universities from './universities';
-import Conversations from './conversations';
 
 const Courses = new Mongo.Collection('courses');
 
@@ -14,22 +13,27 @@ Meteor.methods({
             'University by that ID not found');
         }
 
-        // create new conversation
-        conversationId = Conversations.insert({messages: []})
+        return Courses.insert({ universityId, title1, title2, subject, conversation: {messages: []} });
+    },
 
-        return Courses.insert({ universityId, title1, title2, subject, conversationId });
+    'courses.sendMessage': ({courseId, message}) => {
+        // update the messages object
+        Courses.update(
+            {_id: courseId},
+            {$push: { "conversation.messages": message }}
+        )
     },
     
-    'courses.getAllForUni': ({universityId}) => {
-        const uni = Universities.findOne(universityId);
+    // 'courses.getAllForUni': ({universityId}) => {
+    //     const uni = Universities.findOne(universityId);
 
-        if (uni == null) {
-            throw new Meteor.Error('courses.addOne.notFound',
-            'University by that ID not found');
-        }
+    //     if (uni == null) {
+    //         throw new Meteor.Error('courses.addOne.notFound',
+    //         'University by that ID not found');
+    //     }
 
-        return Courses.find({universityId: universityId}).fetch();
-    },
+    //     return Courses.find({universityId: universityId}).fetch();
+    // },
 })
 
 Meteor.publish('courses', function () {
@@ -38,14 +42,16 @@ Meteor.publish('courses', function () {
       });
 });
 
-Meteor.publish('course', function({_id}) {
-    return Courses.find({_id});
+Meteor.publish('course', function({courseId}) {
+    return Courses.find({_id: courseId});
 })
 
 Meteor.publish('myCourses', function () {
     const courses = Meteor.user().profile.completedCourses;
     const courseIds = Object.keys(courses)
-    return Courses.find({_id: {$in: courseIds}});
+    return Courses.find({_id: {$in: courseIds}}, {
+        fields: { conversation: 0 }
+    });
 });
 
 export default Courses;

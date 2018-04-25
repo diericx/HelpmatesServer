@@ -2,12 +2,8 @@ import { Random } from 'meteor/random'
 import { Meteor } from 'meteor/meteor';
 import Courses from "./courses";
 import Ratings from "./ratings";
-import Conversations from "./conversations";
 
 Accounts.onCreateUser((options, user) => {
-    // create support conversation for this user
-    conversationId = Conversations.insert({messages: []})
-
     // send system message update
     const message = {
         _id: Random.id(),
@@ -15,9 +11,6 @@ Accounts.onCreateUser((options, user) => {
         createdAt: new Date(),
         system: true,
     }
-    // send system message
-    Meteor.call("conversations.sendMessage", {conversationId, message})
-
     // add your extra fields here; don't forget to validate the options, if needed
     _.extend(user, {
         createdAt: new Date(),
@@ -27,6 +20,9 @@ Accounts.onCreateUser((options, user) => {
             completedCourses: {},
             rate: 0,
             availabilities: [],
+        },
+        conversation: {
+            messages: [message],
         }
     });
 

@@ -3,7 +3,6 @@ import '../imports/api/courses';
 import '../imports/api/universities';
 import '../imports/api/users';
 import '../imports/api/helpSession';
-import '../imports/api/conversations';
 import '../imports/api/images';
 import '../imports/api/ratings';
 

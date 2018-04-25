@@ -5,7 +5,7 @@ const Universities = new Mongo.Collection('universities');
 
 Meteor.methods({
     'universities.addOne': ({ name, abbreviation, state, city }) => {
-        return Universities.insert({ name, abbreviation, state, city });
+        return Universities.insert({ name, abbreviation, state, city, conversation: {messages: []} });
     },
 })
 
