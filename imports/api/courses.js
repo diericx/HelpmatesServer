@@ -33,7 +33,9 @@ Meteor.methods({
 })
 
 Meteor.publish('courses', function () {
-    return Courses.find({})
+    return Courses.find({}, {
+        fields: { conversation: 0 }
+      });
 });
 
 Meteor.publish('course', function({_id}) {
