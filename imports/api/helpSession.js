@@ -32,7 +32,7 @@ Meteor.methods({
         // create the messages and notifications for this help session
         var messages = [message]
         var notifications = {}
-        notifications[studentId] = 1
+        notifications[tutorId] = 1
 
         // Send push notification to the tutor
         if (tutor.profile.pushNotificationToken) {
@@ -54,11 +54,19 @@ Meteor.methods({
         )
         
         // update the notifications
-        const currentNotificationValue = session.notifications[otherUsersId]
+        const currentNotificationValue = session.notifications[otherUsersId] || 0
         const notificationLocation = `notifications.${otherUsersId}`
         HelpSessions.update(
             {_id: sessionId},
             {$set: { [notificationLocation]: currentNotificationValue + 1 }}
+        )
+    },
+
+    'helpSessions.clearNotificationsForUser': ({sessionId}) => {
+        const notificationLocation = `notifications.${Meteor.userId()}`
+        HelpSessions.update(
+            {_id: sessionId},
+            {$set: { [notificationLocation]: 0 }}
         )
     },
     
