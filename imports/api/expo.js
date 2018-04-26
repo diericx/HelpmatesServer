@@ -6,7 +6,7 @@ let expo = new Expo();
 export function SendPushNotification(token, title, body) {
   let messages = [];
   messages.push({
-      to: tutor.profile.pushNotificationToken,
+      to: token,
       sound: 'default',
       title: title,
       body: body,

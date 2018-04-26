@@ -46,12 +46,17 @@ Meteor.methods({
     'helpSessions.sendMessage': ({sessionId, message}) => {
         const session = HelpSessions.findOne(sessionId)
         const otherUsersId = message.user._id == session.tutorId ? session.studentId : session.tutorId
-
+        const receiver = Meteor.users.findOne(otherUsersId);
         // update the messages object
         HelpSessions.update(
             {_id: sessionId},
             {$push: { "messages": message }}
         )
+
+        // Send push notification to receipiant
+        if (receiver.profile.pushNotificationToken) {
+            SendPushNotification(receiver.profile.pushNotificationToken, Meteor.user().profile.name + " sent you a message!", message.text)
+        }
         
         // update the notifications
         const currentNotificationValue = session.notifications[otherUsersId] || 0
@@ -74,7 +79,7 @@ Meteor.methods({
         // find session
         const session = HelpSessions.findOne(sessionId)
         const tutor = Meteor.users.findOne({_id: session.tutorId})
-        const student = Meteor.users.findOne({_id: studentId});
+        const student = Meteor.users.findOne({_id: session.studentId});
         // make sure this user has authority to accept a session
         if (session.tutorId == Meteor.userId()) {
             HelpSessions.update(
