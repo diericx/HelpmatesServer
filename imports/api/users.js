@@ -122,6 +122,15 @@ Meteor.methods({
         )
     },
 
+    'users.removeAvailability': ({dayOfWeek, index}) => {
+        const availabilities = Meteor.user().profile.availabilities
+        availabilities[dayOfWeek].splice(index, 1)
+        Meteor.users.update(
+            {_id: Meteor.userId()}, 
+            { $set: {"profile.availabilities": availabilities} }
+        )
+    },
+
     // GETTERS
     'users.getAvailabilities': ({userId}) => {
         const user = Meteor.users.findOne(userId)
