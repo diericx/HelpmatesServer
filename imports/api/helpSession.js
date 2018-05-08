@@ -33,6 +33,7 @@ Meteor.methods({
         var messages = [message]
         var notifications = {}
         notifications[tutorId] = 1
+        notifications[student] = 0
 
         // Send push notification to the tutor
         if (tutor.profile.pushNotificationToken) {
@@ -45,20 +46,24 @@ Meteor.methods({
 
     'helpSessions.sendMessage': ({sessionId, message}) => {
         const session = HelpSessions.findOne(sessionId)
-        const otherUsersId = message.user._id == session.tutorId ? session.studentId : session.tutorId
-        const receiver = Meteor.users.findOne(otherUsersId);
         // update the messages object
         HelpSessions.update(
             {_id: sessionId},
             {$push: { "messages": message }}
         )
 
-        // Send push notification to receipiant
-        if (receiver.profile.pushNotificationToken) {
-            SendPushNotification(receiver.profile.pushNotificationToken, Meteor.user().profile.name + " sent you a message!", message.text)
+        // if it's a system message, don't do notifications
+        // TODO: Send notifications but don't use message info or else there is an error
+        if (message.system === true) {
+            return;
         }
+
+        // Send push notification to receipiant
+        SendPushNotification(receiver.profile.pushNotificationToken, Meteor.user().profile.name + " sent you a message!", message.text)
         
         // update the notifications
+        const otherUsersId = message.user._id == session.tutorId ? session.studentId : session.tutorId
+        const receiver = Meteor.users.findOne(otherUsersId);
         const currentNotificationValue = session.notifications[otherUsersId] || 0
         const notificationLocation = `notifications.${otherUsersId}`
         HelpSessions.update(
@@ -89,16 +94,18 @@ Meteor.methods({
 
             // send system message update
             const message = {
-                _id: Random.id(),
                 text: tutor.profile.name + " accepted! Figure out where to meet.",
                 createdAt: new Date(),
                 system: true,
+                _id: Random.id(),
             }
             // send system message
-            Meteor.call("helpSessions.sendMessage", {sessionId: session._id, message})
+            Meteor.call("helpSessions.sendMessage", {sessionId: sessionId, message})
 
-            // Send push notification to the student
-            SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " accepted your request!")
+            // Send push notification to the student IF they have a notification token
+            if (student.profile.pushNotificationToken) {
+                SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " accepted your request!")
+            }
 
             return true
         }

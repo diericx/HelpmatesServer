@@ -4,6 +4,11 @@ import Expo from 'expo-server-sdk';
 let expo = new Expo();
 
 export function SendPushNotification(token, title, body) {
+  // if the token doesn't exist, don't send the notification
+  if (!token) {
+    return;
+  }
+  
   let messages = [];
   messages.push({
       to: token,

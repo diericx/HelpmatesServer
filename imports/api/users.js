@@ -18,7 +18,7 @@ Accounts.onCreateUser((options, user) => {
             name: options.name,
             completedCourses: {},
             rate: 0,
-            availabilities: [],
+            availabilities: [[],[],[],[],[],[],[]], // availabilities for each day
         },
         messages: [message],
     });
@@ -112,11 +112,13 @@ Meteor.methods({
         )
     },
 
-    'users.addAvailability': ({date, length, repeats}) => {
-        var newAvailability = {"date": date, "length": length, "repeats": repeats}
+    'users.addAvailability': ({dayOfWeek, hours, minutes, duration}) => {
+        const newAvailability = {hours, minutes, duration}
+        const availabilities = Meteor.user().profile.availabilities
+        availabilities[dayOfWeek].push(newAvailability)
         Meteor.users.update(
             {_id: Meteor.userId()}, 
-            { $addToSet: {"profile.availabilities": newAvailability} }
+            { $set: {"profile.availabilities": availabilities} }
         )
     },
 
