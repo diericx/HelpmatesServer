@@ -1,0 +1,86 @@
+Meteor.call('Universities.addOne', 'University of Denver', 'DU', 'CO', 'Denver')
+Meteor.call('courses.addOne', 'asdf', 'asf', 'asdf', 'asdf')
+Meteor.call('courses.addOne', 'asdf', 'asf', 'asdf', 'asdf')
+Meteor.call('courses.addOne', 'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science')
+Universities.find()
+Meteor.call('Universities.find')
+.help
+.editor
+Unis = Mongo.Collection.get("universities")
+Mongo.Collection.getAll()
+Meteor.call('courses.addOne', "bJ2ppiHYrMFRThfWE", 'Intro to Computer Science I', 'COMP 1671', 'Computer Science')
+show collections
+db.listCollections()
+db.getCollectionNames()
+help
+.help
+.show collections
+Meteor.call('courses.addOne', 'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science')
+Meteor.call('courses.addOne', {'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science'})
+;
+Meteor.call('courses.addOne', {'bJ2ppiHYrMFRThfWE', 'Intro to Computer Science I', 'COMP 1671', 'Computer Science'});
+Mongo
+Mongo.Collection.get("users")
+Mongo.Collection.getAll()
+Mongo.Collection
+Mongo.Collection[0]
+UsersCollection
+Users
+User.find()
+Users.find()
+UsersCollection
+Meteor.users.find().fetch()
+Meteor.users.find()
+Meteor.users
+Meteor.users.rawCollection
+Meteor.users.rawCollection()
+Meteor.users.find()
+Meteor.users.find().fetch()
+Meteor.courses.find().fetch()
+Meteor.Courses.find().fetch()
+Meteor.call('users.allCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.usersCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.usersCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.usersCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.usersCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.users.find()
+Meteor.users.find({ completedCourses: { $elemMatch: { courseId: '5vCDum3ypWryXENd4' } }})
+Meteor.users.find({ completedCourses: { $elemMatch: { courseId: '5vCDum3ypWryXENd4' } }}).fetch()
+Meteor.call('courses.usersCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.user()
+Meteor.users.find()
+Meteor.users.find().fetch()
+Meteor.users.find().fetch()
+Meteor.users.find().fetch()
+Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.users.find().fetch()
+Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.call('courses.getAllUsersWhoCompletedCourse', {courseId: '5vCDum3ypWryXENd4'})
+Meteor.users.allow({remove:function() { return true });
+Meteor.users.remove("uYx4R2gjG4rQGs9HA")
+Meteor.users.find().fetch()
+Meteor.users.remove("uYx4R2gjG4rQGs9HA")
+Meteor.users.find().fetch()
+Meteor.users.remove('HtX7xK7wbqcNbJTZQ')
+Meteor.users.find().fetch()
+Meteor.courses.find().fetch()
+Meteor.Courses.find()
+Meteor.users.remove('YB3ydNgzJ4QudPw3L')
+Meteor.users.find().fetch()
+Meteor.users.find().profile.name = "Zac Holland"
+Meteor.users.find().fetch()
+Meteor.users.find().fetch()
+Meteor.users.remove('d9hWZSYsamw8pERZn)
+Meteor.users.remove('d9hWZSYsamw8pERZn')
+meteor mongo -u
+Meteor
+Meteor.collection('conversations')
+Meteor.call
+Meteor.call('universities.addOne', {name: "University of South California", abbreviation: "USC", state: "CA", city: ""})
+Meteor.call('courses.addOne')
+Meteor.call('courses.addOne', {universityId: 'bJ2ppiHYrMFRThfWE', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science')
+;
+Meteor.call('courses.addOne', {universityId: 'bJ2ppiHYrMFRThfWE', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science');
+Meteor.call('universities.addOne', {name: 'University of Denver', abbreviation: 'DU', state: 'CO', city: 'Denver'})
+ Meteor.call('courses.addOne', {universityId: '6LRFSper4CZyxn6Nc', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science'})
