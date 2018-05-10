@@ -8,7 +8,7 @@ Add university
     Meteor.call('universities.addOne', {name: 'University of Denver', abbreviation: 'DU', state: 'CO', city: 'Denver'})
 
 Add course
-    Meteor.call('courses.addOne', {universityId: '6LRFSper4CZyxn6Nc', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science'})
+    Meteor.call('courses.addOne', {universityId: '9Kn8hjCNex5zP7v4W', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science'})
 
 
 

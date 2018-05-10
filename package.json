@@ -8,6 +8,8 @@
     "@babel/runtime": "^7.0.0-beta.36",
     "bcrypt": "^1.0.3",
     "expo-server-sdk": "^2.3.3",
-    "meteor-node-stubs": "^0.3.2"
+    "meteor-node-stubs": "^0.3.2",
+    "react": "^16.3.2",
+    "react-dom": "^16.3.2"
   }
 }

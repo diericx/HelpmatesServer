@@ -36,23 +36,26 @@ Meteor.methods({
     // },
 })
 
-Meteor.publish('courses', function () {
-    return Courses.find({}, {
-        fields: { messages: 0 }
-      });
-});
-
-Meteor.publish('course', function({courseId}) {
-    return Courses.find({_id: courseId});
-})
-
-Meteor.publish('myCourses', function () {
-    const courses = Meteor.user().profile.completedCourses;
-    const courseIds = Object.keys(courses)
-    return Courses.find({_id: {$in: courseIds}}, {
-        fields: { messages: 0 }
+// Only publish on server
+if (!Meteor.isClient) {
+    Meteor.publish('courses', function () {
+        return Courses.find({}, {
+            fields: { messages: 0 }
+        });
     });
-});
+
+    Meteor.publish('course', function({courseId}) {
+        return Courses.find({_id: courseId});
+    })
+
+    Meteor.publish('myCourses', function () {
+        const courses = Meteor.user().profile.completedCourses;
+        const courseIds = Object.keys(courses)
+        return Courses.find({_id: {$in: courseIds}}, {
+            fields: { messages: 0 }
+        });
+    });
+}
 
 export default Courses;
 

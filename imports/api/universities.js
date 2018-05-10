@@ -9,4 +9,12 @@ Meteor.methods({
     },
 })
 
+// Only publish on server
+if (!Meteor.isClient) {
+    Meteor.publish('universities', function () {
+        return Universities.find({});
+    });
+}
+
+
 export default Universities;
