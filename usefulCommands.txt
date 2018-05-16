@@ -11,5 +11,8 @@ Add course
     Meteor.call('courses.addOne', {universityId: '9Kn8hjCNex5zP7v4W', title1: 'Intro to Computer Science I', title2: 'COMP 1671', subject: 'Computer Science'})
 
 
+Meteor.call('courses.addOne', {universityId: '9Kn8hjCNex5zP7v4W', title1: 'Intro to Computer Science III', title2: 'COMP 1673', subject: 'Computer Science'})
+
+Meteor.call('courses.addOne', {universityId: '9Kn8hjCNex5zP7v4W', title1: 'Analytics III: Business Modeling and Analysis', title2: 'INFO 2020', subject: 'Business Information & Analytics'})
 
 'courses.addOne': ({ universityId, title1, title2, subject })

@@ -16,6 +16,7 @@ Accounts.onCreateUser((options, user) => {
         createdAt: new Date(),
         profile: {
             name: options.name,
+            venmoHandle: options.venmoHandle,
             completedCourses: {},
             rate: 0,
             availabilities: [[],[],[],[],[],[],[]], // availabilities for each day

@@ -25,6 +25,7 @@ Meteor.methods({
             user: {
                 _id: studentId,
                 name: student.profile.name,
+                avatar: student.profile.profilePic
             },
             createdAt: new Date(),
             _id: Random.id(),
@@ -41,12 +42,16 @@ Meteor.methods({
         }
 
         // create new help session with link to convo
-        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", messages, notifications  });
+        return HelpSessions.insert({ studentId, tutorId, courseId, cost, startDate, endDate, hasStudentPayed: false, tutorAccepted: false, tutorDenied: false, tutorStarted: false, studentStarted: false, tutorEnded: false, studentEnded: false,  denyMessage: "", cancelled: false, cancelledBy: null, cancelMessage: "", messages, notifications  });
     },
 
     'helpSessions.sendMessage': ({sessionId, message}) => {
         const session = HelpSessions.findOne(sessionId)
         // update the messages object
+        // set avatar to user who sent message
+        if (message.user) {
+            message.user.avatar = Meteor.user().profile.profilePic
+        }
         HelpSessions.update(
             {_id: sessionId},
             {$push: { "messages": message }}
@@ -56,16 +61,16 @@ Meteor.methods({
         // TODO: Send notifications but don't use message info or else there is an error
         if (message.system === true) {
             return;
-        }
-
-        // Send push notification to receipiant
-        SendPushNotification(receiver.profile.pushNotificationToken, Meteor.user().profile.name + " sent you a message!", message.text)
-        
-        // update the notifications
+        }        
+        // get info to update the notifications
         const otherUsersId = message.user._id == session.tutorId ? session.studentId : session.tutorId
         const receiver = Meteor.users.findOne(otherUsersId);
         const currentNotificationValue = session.notifications[otherUsersId] || 0
         const notificationLocation = `notifications.${otherUsersId}`
+
+        // Send push notification to receipiant
+        SendPushNotification(receiver.profile.pushNotificationToken, Meteor.user().profile.name + " sent you a message!", message.text)
+
         HelpSessions.update(
             {_id: sessionId},
             {$set: { [notificationLocation]: currentNotificationValue + 1 }}
@@ -87,9 +92,12 @@ Meteor.methods({
         const student = Meteor.users.findOne({_id: session.studentId});
         // make sure this user has authority to accept a session
         if (session.tutorId == Meteor.userId()) {
+            // get info to update the notifications
+            const currentNotificationValue = session.notifications[student._id] || 0
+            const notificationLocation = `notifications.${student._id}`
             HelpSessions.update(
                 {_id: sessionId},
-                {$set: {tutorAccepted: true}}
+                {$set: {tutorAccepted: true, [notificationLocation]: currentNotificationValue + 1}}
             )
 
             // send system message update
@@ -111,6 +119,42 @@ Meteor.methods({
         }
         return {error: "You do not have access to this session"}
     },
+        
+    'helpSessions.deny': ({ sessionId }) => {
+        // find session
+        const session = HelpSessions.findOne(sessionId)
+        const tutor = Meteor.users.findOne({_id: session.tutorId})
+        const student = Meteor.users.findOne({_id: session.studentId});
+        // make sure this user has authority to accept a session
+        if (session.tutorId == Meteor.userId()) {
+            // get info to update the notifications
+            const currentNotificationValue = session.notifications[student._id] || 0
+            const notificationLocation = `notifications.${student._id}`    
+            HelpSessions.update(
+                {_id: sessionId},
+                {$set: {tutorDenied: true, [notificationLocation]: currentNotificationValue + 1}}
+            )
+
+            // send system message update
+            const message = {
+                text: tutor.profile.name + " denied your request.",
+                createdAt: new Date(),
+                system: true,
+                _id: Random.id(),
+            }
+            // send system message
+            Meteor.call("helpSessions.sendMessage", {sessionId: sessionId, message})
+
+            // Send push notification to the student IF they have a notification token
+            if (student.profile.pushNotificationToken) {
+                SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " denied your request.")
+            }
+
+            return true
+        }
+        return {error: "You do not have access to this session"}
+    },
+
     'helpSessions.end': ({ sessionId }) => {
         // find session
         const session = HelpSessions.findOne(sessionId)
@@ -125,6 +169,7 @@ Meteor.methods({
                 {_id: sessionId},
                 {$set: {studentEnded: true}}
             )
+            session.studentEnded = true
         }
         // if they both ended, add an ended date
         if (session.studentEnded && session.tutorEnded) {
@@ -132,12 +177,13 @@ Meteor.methods({
                 {_id: sessionId},
                 {$set: {endedAt: new Date()}}
             )
-            session.studentEnded = true
         }
     },
     'helpSessions.start': ({ sessionId }) => {
         const session = HelpSessions.findOne(sessionId)
         const userId = Meteor.userId()
+        const tutor = Meteor.users.findOne({_id: session.tutorId})
+        const student = Meteor.users.findOne({_id: session.studentId});
         // make sure session exists
         if (!session) {
             return {error: "Session not found"}
@@ -150,6 +196,8 @@ Meteor.methods({
                 sessionId, 
                 {$set: {tutorStarted: true}}
             )
+            // Send push notification to the student IF they have a notification token
+            SendPushNotification(student.profile.pushNotificationToken, tutor.profile.name + " started a session.")
         }
         // if the user is the student, set studentAccepted to true
         if (session.studentId == userId) {
@@ -159,6 +207,8 @@ Meteor.methods({
                 sessionId, 
                 {$set: {studentStarted: true}}
             )
+            // Send push notification to the student IF they have a notification token
+            SendPushNotification(tutor.profile.pushNotificationToken, student.profile.name + " started a session.")
         }
         // set started at if both have started
         if (session.tutorStarted && session.studentStarted) {
@@ -167,6 +217,22 @@ Meteor.methods({
                 {$set: {startedAt: new Date()}}
             )
         }
+    },
+
+    'helpSessions.confirmPayment': ({ sessionId }) => {
+        const session = HelpSessions.findOne(sessionId)
+        const userId = Meteor.userId()
+        // make sure session exists and this is the right person
+        if (!session) {
+            return {error: "Session not found"}
+        }
+        if (session.tutorId != Meteor.userId()) {
+            return {error: "You cannot perform this action"}
+        }
+        // if the user is the tutor, set tutorAccepted to true
+            HelpSessions.update(
+                sessionId, 
+                {$set: {hasStudentPayed: true}})
     }
 });
 
