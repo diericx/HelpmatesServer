@@ -1,5 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Meteor } from 'meteor/meteor';
+
 import Universities from './universities';
 
 const Courses = new Mongo.Collection('courses');
@@ -13,7 +14,9 @@ Meteor.methods({
             'University by that ID not found');
         }
 
-        return Courses.insert({ universityId, title1, title2, subject, messages: []});
+        const conversationId = Meteor.call("conversations.addOne")
+
+        return Courses.insert({ universityId, title1, title2, subject});
     },
 
     'courses.sendMessage': ({courseId, message}) => {
